@@ -98,6 +98,9 @@ public class AuctionsController : ControllerBase
         auction.Item.Color = updatedAuctionDto.Color ?? auction.Item.Color;
         auction.Item.Mileage = updatedAuctionDto.Mileage ?? auction.Item.Mileage;
         auction.Item.Year = updatedAuctionDto.Year ?? auction.Item.Year;
+        auction.UpdatedAt = DateTime.UtcNow;
+
+        await _publishEndpoint.Publish(_mapper.Map<AuctionUpdated>(auction));
 
         var result = await _context.SaveChangesAsync() > 0;
 
@@ -124,6 +127,9 @@ public class AuctionsController : ControllerBase
         // TODO : check if the current user is the seller of the auction
 
         _context.Auctions.Remove(auction);
+
+        await _publishEndpoint.Publish<AuctionDeleted>(new { Id = auction.Id.ToString() });
+
         var result = await _context.SaveChangesAsync() > 0;
 
         if (!result) return BadRequest("Failed to delete auction");
