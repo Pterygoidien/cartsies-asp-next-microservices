@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using IdentityModel;
 using IdentityService.Models;
 using IdentityService.Pages.Account.Register;
@@ -17,8 +18,9 @@ public class Index : PageModel
 
     public Index(UserManager<ApplicationUser> userManager)
     {
-        this._userManager = userManager;
+        _userManager = userManager;
     }
+
     [BindProperty]
     public RegisterInputModel Input { get; set; }
 
@@ -27,55 +29,40 @@ public class Index : PageModel
 
     public IActionResult OnGet(string returnUrl)
     {
-        BuildModelAsync(returnUrl);
+        Input = new RegisterInputModel
+        {
+            ReturnUrl = returnUrl,
+        };
 
         return Page();
-
     }
 
     public async Task<IActionResult> OnPost()
     {
         if (Input.Button != "register") return Redirect("~/");
-        if (!ModelState.IsValid)
+
+        if (ModelState.IsValid)
         {
             var user = new ApplicationUser
             {
                 UserName = Input.Username,
                 Email = Input.Email,
-                EmailConfirmed = true,
+                EmailConfirmed = true
             };
 
             var result = await _userManager.CreateAsync(user, Input.Password);
 
             if (result.Succeeded)
             {
-                await _userManager.AddClaimAsync(user, new Claim[]
+                await _userManager.AddClaimsAsync(user, new Claim[]
                 {
-                    new Claim(JwtClaimTypes.Name, Input.FullName)
+                        new Claim(JwtClaimTypes.Name, Input.FullName)
                 });
 
                 RegisterSuccess = true;
-
             }
-            else
-            {
-                foreach (var error in result.Errors)
-                {
-                    ModelState.AddModelError(string.Empty, error.Description);
-                }
-                return Page();
-            }
-
         }
 
-    }
-
-    public void BuildModelAsync(string returnUrl)
-    {
-        Input = new RegisterInputModel
-        {
-            ReturnUrl = returnUrl
-        };
-
+        return Page();
     }
 }
