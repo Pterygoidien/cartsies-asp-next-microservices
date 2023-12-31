@@ -5,6 +5,7 @@ using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Contracts;
 using MassTransit;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -53,12 +54,14 @@ public class AuctionsController : ControllerBase
 
         return _mapper.Map<AuctionDto>(auction);
     }
+
+    [Authorize]
     [HttpPost]
     public async Task<ActionResult<AuctionDto>> CreateAuction(CreateAuctionDto createdAuctionDto)
     {
         var auction = _mapper.Map<Auction>(createdAuctionDto); // map the auctionDto (CreateAuctionDto) to an Auction object
         // TODO : add current user as the auctioneer/seller
-        auction.Seller = "Test";
+        auction.Seller = User.Identity.Name;
 
         _context.Auctions.Add(auction);
 
@@ -84,6 +87,7 @@ public class AuctionsController : ControllerBase
         return CreatedAtAction(nameof(GetAuctionById), new { id = auction.Id }, _mapper.Map<AuctionDto>(auction));
     }
 
+    [Authorize]
     [HttpPut("{id}")]
     public async Task<ActionResult> UpdateAuction(Guid id, UpdateAuctionDto updatedAuctionDto)
     {
@@ -92,6 +96,8 @@ public class AuctionsController : ControllerBase
         if (auction == null) return NotFound();
 
         // TODO: check if the current user is the seller of the auction
+        if (auction.Seller != User.Identity.Name) return Forbid();
+
 
         auction.Item.Make = updatedAuctionDto.Make ?? auction.Item.Make;
         auction.Item.Model = updatedAuctionDto.Model ?? auction.Item.Model;
@@ -116,7 +122,7 @@ public class AuctionsController : ControllerBase
         return Ok();
 
     }
-
+    [Authorize]
     [HttpDelete("{id}")]
     public async Task<ActionResult> DeleteAuction(Guid id)
     {
@@ -125,6 +131,7 @@ public class AuctionsController : ControllerBase
         if (auction == null) return NotFound();
 
         // TODO : check if the current user is the seller of the auction
+        if (auction.Seller != User.Identity.Name) return Forbid();
 
         _context.Auctions.Remove(auction);
 
