@@ -9,6 +9,8 @@ services:
       - 5439:5432
     volumes:
       - /var/lib/postgresql/data
+    networks:
+      - services
 
   mongodb:
     image: mongo:latest
@@ -21,6 +23,8 @@ services:
       - 27017:27017
     volumes:
       - /data/db
+    networks:
+      - services
 
   rabbitmq:
     image: rabbitmq:3-management-alpine
@@ -29,3 +33,29 @@ services:
     ports:
       - 5672:5672
       - 15672:15672
+    networks:
+      - services
+
+  auction-svc:
+    build:
+      context: ./
+      dockerfile: src/AuctionService/Dockerfile
+    container_name: auction
+    restart: always
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:80
+      - RabbitMQ__Host=rabbitmq
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=postgres;Username=postgres;Password=postgrespw
+      - IdentityServiceUrl=http://identity-svc
+    ports:
+      - 7001:80
+    depends_on:
+      - postgres
+      - rabbitmq
+    networks:
+      - services
+
+networks:
+  services:
+    driver: bridge
