@@ -40,7 +40,7 @@ services:
     build:
       context: ./
       dockerfile: src/AuctionService/Dockerfile
-    container_name: auction
+    container_name: auction-svc
     restart: always
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
@@ -53,6 +53,26 @@ services:
     depends_on:
       - postgres
       - rabbitmq
+    networks:
+      - services
+
+  search-svc:
+    build:
+      context: ./
+      dockerfile: src/SearchService/Dockerfile
+    container_name: search-svc
+    restart: always
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:80
+      - RabbitMQ__Host=rabbitmq
+      - ConnectionStrings__MongoDbConnection=mongodb://root:mongopw@mongodb:27017/
+      - AuctionServiceUrl=http://auction-svc
+    ports:
+      - 7002:80
+    depends_on:
+      - postgres
+      - mongodb
     networks:
       - services
 
