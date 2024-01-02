@@ -1,0 +1,12 @@
+{
+  "files.exclude": {
+    "**/.git": true,              // This hides the .git folder
+    "**/.DS_Store": true,         // This hides the .DS_Store files
+    "**/node_modules": true,      // This hides the node_modules folder
+    "*.log": true,                 // This hides all files with a .log extension
+    ".github": true,
+    "**/bin":true,
+    "**/obj":true,
+    "**/.next":true,
+  }
+}
