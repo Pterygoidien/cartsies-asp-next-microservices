@@ -5,13 +5,14 @@ import { FaSearch } from 'react-icons/fa';
 export default function Search(): JSX.Element {
     
     const setParams = useParamsStore(state => state.setParams);
-    const [value, setValue] = useState('');
+    const setSearchValue = useParamsStore(state => state.setSearchValue);
+    const searchValue = useParamsStore(state => state.searchValue);
 
     function onChangeHandler(e: React.ChangeEvent<HTMLInputElement>):void {
-        setValue(e.target.value);
+        setSearchValue(e.target.value);
     }
     function search(): void {
-        setParams({searchTerm: value});
+        setParams({searchTerm: searchValue});
     }
 
     return (
@@ -19,6 +20,7 @@ export default function Search(): JSX.Element {
             <input
                 onChange={onChangeHandler}
                 onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => e.key === 'Enter' && search()}
+                value={searchValue}
                 type="text"
                 placeholder="Search for cars by make, model or color"
                 className="flex-grow pl-5 bg-transparent focus:outline-none border-transparent focus:border-transparent focus:ring-0 text-sm text-gray-600 placeholder-gray-400"
