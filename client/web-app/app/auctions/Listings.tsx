@@ -4,33 +4,45 @@ import AppPagination from "../components/AppPagination";
 import { useEffect, useState } from "react";
 import { getData } from "../actions/auctionActions";
 import Filters from "./Filters";
+import { PagedResult } from "@/types";
+import { useParamsStore } from "@/hooks/useParamsStore";
+import { shallow } from "zustand/shallow";
+import qs from "query-string";
 
 
 export default function Listings()
 {
-  const [auctions, setAuctions] = useState<IAuction[]>([]);
-  const [pageCount, setPageCount] = useState<number>(0);
-  const [currentPage, setCurrentPage] = useState<number>(1);
-  const [pageSize, setPageSize] = useState<number>(4);
+  const [data, setData] = useState<PagedResult<IAuction>>();
+  const params = useParamsStore(state => ({
+    pageNumber: state.pageNumber,
+    pageSize: state.pageSize,
+    searchTerm: state.searchTerm,
+  }), shallow);
+  const setParams = useParamsStore(state => state.setParams);
+  const url = qs.stringifyUrl({ url: '', query: params });
+  
+  function setPageNumber(pageNumber: number) {
+    setParams({ pageNumber });
+  }
+
 
   useEffect(() => {
-    getData(currentPage, pageSize).then(data => {
-      setAuctions(data.results);
-      setPageCount(data.pageCount);
+    getData(url).then(data => {
+      setData(data);
     })
-  }, [currentPage, pageSize]);
+  }, [url]);
 
-  if(auctions.length === 0) return <p>Loading...</p>
+  if(!data) return <p>Loading...</p>
   return (
     <>
-      <Filters pageSize={pageSize} setPageSize={setPageSize} />
+      <Filters />
        <section className="grid grid-cols-4 gap-6">
-        {auctions && auctions.map((auction: IAuction) => (
+        {data.results.map((auction: IAuction) => (
           <AuctionCard key={auction.id} auction={auction} />
         ))}
       </section>
       <section className="flex justify-center mt-4">
-        <AppPagination pageChanged={setCurrentPage} currentPage={currentPage} pageCount={pageCount} />
+        <AppPagination pageChanged={setPageNumber} currentPage={params.pageNumber} pageCount={data.pageCount} />
       </section>
     </>  
   )
