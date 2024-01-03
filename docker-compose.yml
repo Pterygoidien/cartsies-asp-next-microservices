@@ -9,8 +9,6 @@ services:
     image: postgres
     environment:
       - POSTGRES_PASSWORD=postgrespw
-    ports:
-      - 5432:5432
     volumes:
       - /var/lib/postresql/data
     networks:
@@ -29,7 +27,6 @@ services:
   rabbitmq:
     image: rabbitmq:3-management-alpine
     ports:
-      - 5672:5672
       - 15672:15672
     networks:
       custom:
@@ -50,7 +47,6 @@ services:
       - Kestrel__Endpoints__WebApi__Protocols=Http1
       - Kestrel__Endpoints__WebApi__Url=Http://+:80
     ports:
-      - 7001:80
       - 7777:7777
     depends_on:
       - postgres
@@ -68,8 +64,6 @@ services:
       - RabbitMq__Host=rabbitmq
       - ConnectionStrings__MongoDbConnection=mongodb://root:mongopw@mongodb
       - AuctionServiceUrl=http://auction-svc
-    ports:
-      - 7002:80
     depends_on:
       - mongodb
       - rabbitmq
