@@ -8,6 +8,7 @@ import { PagedResult } from "@/types";
 import { useParamsStore } from "@/hooks/useParamsStore";
 import { shallow } from "zustand/shallow";
 import qs from "query-string";
+import EmptyFilter from "../components/EmptyFilter";
 
 
 export default function Listings()
@@ -17,6 +18,8 @@ export default function Listings()
     pageNumber: state.pageNumber,
     pageSize: state.pageSize,
     searchTerm: state.searchTerm,
+    orderBy: state.orderBy,
+    filterBy: state.filterBy
   }), shallow);
   const setParams = useParamsStore(state => state.setParams);
   const url = qs.stringifyUrl({ url: '', query: params });
@@ -32,11 +35,15 @@ export default function Listings()
     })
   }, [url]);
 
-  if(!data) return <p>Loading...</p>
+  if (!data) return <p>Loading...</p>
+  
   return (
     <>
       <Filters />
-       <section className="grid grid-cols-4 gap-6">
+      {data.totalCount === 0 ? (
+        <EmptyFilter showReset />
+      ) : (<>
+           <section className="grid grid-cols-4 gap-6">
         {data.results.map((auction: IAuction) => (
           <AuctionCard key={auction.id} auction={auction} />
         ))}
@@ -44,6 +51,10 @@ export default function Listings()
       <section className="flex justify-center mt-4">
         <AppPagination pageChanged={setPageNumber} currentPage={params.pageNumber} pageCount={data.pageCount} />
       </section>
+          </>
+      )
+      }
+      
     </>  
   )
 }
