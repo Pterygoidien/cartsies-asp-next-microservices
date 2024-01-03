@@ -19,18 +19,11 @@ const initialState: State = {
   searchTerm: "",
 };
 
-export const useParamsStore = create<State & Actions>()((set, get) => ({
+export const useParamsStore = create<State & Actions>()((set) => ({
   ...initialState,
   setParams: (params: Partial<State>): void =>
     set((state: State) => {
-      if (
-        params.pageNumber &&
-        params.pageNumber > 0 &&
-        params.pageNumber <= state.pageCount
-      ) {
-        params.pageNumber = params.pageNumber;
-      }
-
+      if (!params.pageNumber) params.pageNumber = 1;
       return {
         ...state,
         ...params,
