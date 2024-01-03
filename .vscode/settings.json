@@ -8,5 +8,6 @@
     "**/bin":true,
     "**/obj":true,
     "**/.next":true,
-  }
+  },
+  "files.eol": "\r\n",              // This sets the default end of line character to CRLF
 }
