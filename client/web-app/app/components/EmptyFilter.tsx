@@ -15,7 +15,6 @@ export default function EmptyFilter({
 }: Props): JSX.Element {
     
     const reset = useParamsStore(state => state.reset);
-
     return (
         <div className="flex flex-col h-[40vh] gap-2 justify-center items-center shaddow-lg">
             <Heading title={title} subtitle={subtitle} center />
