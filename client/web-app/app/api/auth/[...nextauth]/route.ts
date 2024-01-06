@@ -1,46 +1,35 @@
 import NextAuth, { NextAuthOptions } from "next-auth";
-import DuendeIDS6Provider from "next-auth/providers/duende-identity-server6";
+import DuendeIdentityServer6 from "next-auth/providers/duende-identity-server6";
+// import DuendeIDS6Provider from "next-auth/providers/duende-identity-server6";
 
-const authOptions: NextAuthOptions = {
+export const authOptions: NextAuthOptions = {
   session: {
     strategy: "jwt",
   },
   providers: [
-    DuendeIDS6Provider({
-      id: "duende-identity-server6",
+    DuendeIdentityServer6({
+      id: "id-server",
       name: "Duende Identity Server 6",
-      version: "2.0",
-      accessTokenUrl: "https://localhost:5001/connect/token",
-      requestTokenUrl: "https://localhost:5001/connect/token",
-      profileUrl: "https://localhost:5001/connect/userinfo",
-      clientId: "next-auth",
+      clientId: "nextApp",
       clientSecret: "secret",
-      profile: (profile) => {
-        return {
-          id: profile.sub,
-          name: profile.name,
-          email: profile.email,
-          image: profile.picture,
-          username: profile.preferred_username,
-        };
-      },
+      issuer: "http://localhost:5001",
+      authorization: { params: { scope: "openid profile auctionApp" } },
+      idToken: true,
+      // profile: (profile) => {
+      //   return {
+      //     id: profile.sub,
+      //     name: profile.name,
+      //     email: profile.email,
+      //     image: profile.picture,
+      //     username: profile.preferred_username,
+      //   };
+      // },
     }),
   ],
   callbacks: {
-    async jwt({ token, profile, account }) {
-      if (profile) {
-        token.username = profile.name;
-      }
-      if (account) {
-        token.access_token = account.access_token;
-      }
+    async jwt({ token, profile, account, user }) {
+      console.log("jwt callback", { token, profile, account, user });
       return token;
-    },
-    async session({ session, token }) {
-      if (token) {
-        //session.user.name = token.name;
-      }
-      return session;
     },
   },
 };
