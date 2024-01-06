@@ -15,21 +15,20 @@ export const authOptions: NextAuthOptions = {
       issuer: "http://localhost:5001",
       authorization: { params: { scope: "openid profile auctionApp" } },
       idToken: true,
-      // profile: (profile) => {
-      //   return {
-      //     id: profile.sub,
-      //     name: profile.name,
-      //     email: profile.email,
-      //     image: profile.picture,
-      //     username: profile.preferred_username,
-      //   };
-      // },
     }),
   ],
   callbacks: {
-    async jwt({ token, profile, account, user }) {
-      console.log("jwt callback", { token, profile, account, user });
+    async jwt({ token, profile }) {
+      if (profile) {
+        token.username = profile.username;
+      }
       return token;
+    },
+    async session({ session, token }) {
+      if (token) {
+        session.user.username = token.username;
+      }
+      return session;
     },
   },
 };
