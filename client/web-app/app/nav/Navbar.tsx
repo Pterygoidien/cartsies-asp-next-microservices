@@ -14,7 +14,7 @@ export default async function Navbar(): Promise<JSX.Element> {
       <Logo />
       <Search />
       {user ? 
-        (<UserActions />) : (<LoginButton />)
+        (<UserActions user={user} />) : (<LoginButton />)
       }
      
     </header>   
